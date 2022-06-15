@@ -12,16 +12,22 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
 
     @IBOutlet weak var map: MKMapView!
     var locationManager = CLLocationManager()
+    var travel: Dictionary<String, String> = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configManagerLocation()
+        if travel == [:] {
+            configManagerLocation()
+            
+            let recognitionGesture = UILongPressGestureRecognizer(target: self, action: #selector(ViewController.mark(gesture:)))
+            recognitionGesture.minimumPressDuration = 2
+            
+            map.addGestureRecognizer(recognitionGesture)
+        } else {
+            plot()
+        }
         
-        let recognitionGesture = UILongPressGestureRecognizer(target: self, action: #selector(ViewController.mark(gesture:)))
-        recognitionGesture.minimumPressDuration = 2
-        
-        map.addGestureRecognizer(recognitionGesture)
     }
     
     @objc func mark(gesture: UIGestureRecognizer) {
@@ -43,17 +49,34 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                         }
                     }
                     
-                    print(placeFull)
-                    let annotation = MKPointAnnotation()
-                    annotation.coordinate.latitude = coord.latitude
-                    annotation.coordinate.longitude = coord.longitude
-                    annotation.title = placeFull
-                    annotation.subtitle = placeFull
+                    self.travel = ["place": placeFull, "lat": String(coord.latitude), "lng": String(coord.longitude)]
+                    Storage.save(travel: self.travel)
                     
-                    self.map.addAnnotation(annotation)
+                    self.plot()
                 }
             })
         }
+    }
+    
+    func plot() {
+        if let latS = travel["lat"] {
+            if let lngS = travel["lng"] {
+                let annotation = MKPointAnnotation()
+                
+                annotation.coordinate.latitude = Double(latS)!
+                annotation.coordinate.longitude = Double(lngS)!
+                annotation.title = travel["place"]
+                annotation.subtitle = travel["place"]
+                
+                self.map.addAnnotation(annotation)
+                
+                let location = CLLocationCoordinate2DMake(Double(latS)!, Double(lngS)!)
+                let span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                let region: MKCoordinateRegion = MKCoordinateRegion(center: location, span: span)
+                self.map.setRegion(region, animated: true)
+            }
+        }
+        
     }
 
     func configManagerLocation() {

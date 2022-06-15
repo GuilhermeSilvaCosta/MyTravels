@@ -35,7 +35,7 @@
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="MVb-X1-jvY">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
-                                <segue destination="gAO-31-a30" kind="show" id="JZ1-Yn-Scp"/>
+                                <segue destination="gAO-31-a30" kind="show" identifier="showPlace" id="JZ1-Yn-Scp"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
